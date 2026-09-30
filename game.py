@@ -14,11 +14,12 @@ class SlidingPuzzle:
         while True:
             try:
                 raw = input(f"Board size {VALID_SIZES} [default 4]: ").strip()
-            except EOFError:
+            except (EOFError, KeyboardInterrupt):
+                print()
                 raise SystemExit
             if raw == "":
                 return 4
-            if raw.isdigit() and int(raw) in VALID_SIZES:
+            if raw in ("3", "4", "5"):
                 return int(raw)
             print("Please enter 3, 4 or 5.")
 
@@ -47,12 +48,12 @@ class SlidingPuzzle:
         while True:
             self.display()
             if self.puzzle.solved():
-                self.finished = self.finished or time.monotonic()
                 print(f"Solved in {self.moves} moves and {self.elapsed()} s!")
                 return
             try:
                 key = input("> ").strip().lower()
-            except EOFError:
+            except (EOFError, KeyboardInterrupt):
+                print()
                 return
             if key == "q":
                 return
@@ -61,5 +62,7 @@ class SlidingPuzzle:
                 continue
             if self.puzzle.move(key):
                 self.moves += 1
+                if self.puzzle.solved():
+                    self.finished = time.monotonic()   # freeze before the redraw
             else:
                 print("That move is not possible.")
